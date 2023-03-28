@@ -1,4 +1,5 @@
 import { type Topic } from "@prisma/client";
+import { useAtom } from "jotai";
 import { type NextPage } from "next";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
@@ -7,6 +8,7 @@ import Header from "~/components/Header";
 import { NoteCard } from "~/components/NoteCard";
 import { NoteEditor } from "~/components/NoteEditor";
 import { api } from "~/utils/api";
+import { onEditAtom } from "~/utils/store";
 
 const Home: NextPage = () => {
   return (
@@ -28,6 +30,7 @@ export default Home;
 
 const Content: React.FC = () => {
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
+  const [, setOnEdit] = useAtom(onEditAtom);
 
   const { data: sessionData } = useSession();
 
@@ -68,6 +71,12 @@ const Content: React.FC = () => {
     },
   });
 
+  const updateNote = api.note.update.useMutation({
+    onSuccess: () => {
+      void refetchNotes();
+    },
+  });
+
   return (
     <div className="mx-5 mt-5 grid grid-cols-4 gap-2">
       <div className="px-2">
@@ -80,6 +89,7 @@ const Content: React.FC = () => {
                 onClick={(e) => {
                   e.preventDefault();
                   setSelectedTopic(topic);
+                  setOnEdit(false);
                 }}
               >
                 {topic.title}
@@ -118,6 +128,9 @@ const Content: React.FC = () => {
               title,
               content,
             });
+          }}
+          onUpdate={({ id, title, content }) => {
+            void updateNote.mutate({ id, title, content });
           }}
         />
       </div>

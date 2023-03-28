@@ -1,16 +1,66 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import CodeMirror from "@uiw/react-codemirror";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { languages } from "@codemirror/language-data";
+import CodeMirror from "@uiw/react-codemirror";
+import { useAtom } from "jotai";
+import {
+  currentNoteIdAtom,
+  editLoadingAtom,
+  eidtingNoteAtom,
+  onEditAtom,
+} from "~/utils/store";
 
 export const NoteEditor = ({
   onSave,
+  onUpdate,
 }: {
   onSave: (note: { title: string; content: string }) => void;
+  onUpdate: (note: { id: string; title: string; content: string }) => void;
 }) => {
   const [code, setCode] = useState<string>("");
   const [title, setTitle] = useState<string>("");
+  const [onEdit, setOnEdit] = useAtom(onEditAtom);
+  const [editNote] = useAtom(eidtingNoteAtom);
+  const [editLoading] = useAtom(editLoadingAtom);
+  const [currentNoteId] = useAtom(currentNoteIdAtom);
+
+  const [onUpdateNote, setOnUpdateNote] = useState<boolean>(false);
+
+  const clearInput = () => {
+    setTitle("");
+    setCode("");
+  };
+
+  useEffect(() => {
+    if (onEdit && editNote) {
+      if (!editLoading) {
+        setTitle(editNote.title);
+        setCode(editNote.content);
+      }
+    } else {
+      clearInput();
+    }
+  }, [onEdit, editNote, editLoading]);
+
+  const handleSubmit = () => {
+    if (onEdit) {
+      setOnUpdateNote(true);
+      onUpdate({
+        id: currentNoteId,
+        title,
+        content: code,
+      });
+      setOnEdit(false);
+      clearInput();
+    } else {
+      onSave({
+        title,
+        content: code,
+      });
+      clearInput();
+    }
+  };
 
   return (
     <div className="card mt-5 border border-gray-200 bg-base-100 shadow-xl">
@@ -39,18 +89,11 @@ export const NoteEditor = ({
       </div>
       <div className="card-actions justify-end">
         <button
-          onClick={() => {
-            onSave({
-              title,
-              content: code,
-            });
-            setCode("");
-            setTitle("");
-          }}
+          onClick={handleSubmit}
           className="btn-primary btn"
           disabled={title.trim().length === 0 || code.trim().length === 0}
         >
-          Save
+          {onEdit ? "Update" : "Save"}
         </button>
       </div>
     </div>
