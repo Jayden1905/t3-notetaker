@@ -14,10 +14,12 @@ import {
 export const NoteEditor = ({
   onSave,
   onUpdate,
+  updateLoading,
   updateSuccess,
 }: {
   onSave: (note: { title: string; content: string }) => void;
   onUpdate: (note: { id: string; title: string; content: string }) => void;
+  updateLoading: boolean;
   updateSuccess: boolean;
 }) => {
   const [code, setCode] = useState<string>("");
@@ -51,7 +53,7 @@ export const NoteEditor = ({
         content: code,
       });
       setOnEdit(false);
-      clearInput();
+      if (updateSuccess) clearInput();
     } else {
       onSave({
         title,
@@ -63,6 +65,15 @@ export const NoteEditor = ({
 
   return (
     <div className="card mt-5 border border-gray-200 bg-base-100 shadow-xl">
+      {updateLoading && (
+        <div className="toast-center toast toast-top">
+          <div className="alert alert-warning w-full">
+            <div>
+              <span>Updating....</span>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="card-body">
         <h2 className="card-title">
           <input
