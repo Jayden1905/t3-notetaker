@@ -14,9 +14,11 @@ import {
 export const NoteEditor = ({
   onSave,
   onUpdate,
+  updateSuccess,
 }: {
   onSave: (note: { title: string; content: string }) => void;
   onUpdate: (note: { id: string; title: string; content: string }) => void;
+  updateSuccess: boolean;
 }) => {
   const [code, setCode] = useState<string>("");
   const [title, setTitle] = useState<string>("");
@@ -24,8 +26,6 @@ export const NoteEditor = ({
   const [editNote] = useAtom(eidtingNoteAtom);
   const [editLoading] = useAtom(editLoadingAtom);
   const [currentNoteId] = useAtom(currentNoteIdAtom);
-
-  const [onUpdateNote, setOnUpdateNote] = useState<boolean>(false);
 
   const clearInput = () => {
     setTitle("");
@@ -45,7 +45,6 @@ export const NoteEditor = ({
 
   const handleSubmit = () => {
     if (onEdit) {
-      setOnUpdateNote(true);
       onUpdate({
         id: currentNoteId,
         title,

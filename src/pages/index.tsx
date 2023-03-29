@@ -132,6 +132,7 @@ const Content: React.FC = () => {
           onUpdate={({ id, title, content }) => {
             void updateNote.mutate({ id, title, content });
           }}
+          updateSuccess={updateNote.isSuccess}
         />
       </div>
     </div>
